@@ -213,6 +213,11 @@ PGAC_ARG_BOOL(enable, debug-extensions, no,
               [include debug extensions in gpcontrib])
 AC_SUBST(enable_debug_extensions)
 
+# Install legacy untrusted language extensions by default for compatibility.
+PGAC_ARG_BOOL(enable, legacy-pl-extensions, yes,
+              [do not install the legacy plperlu and plpythonu extensions])
+AC_SUBST(enable_legacy_pl_extensions)
+
 #
 # orafce
 #

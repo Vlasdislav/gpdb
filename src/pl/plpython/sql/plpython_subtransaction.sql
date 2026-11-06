@@ -31,7 +31,7 @@ try:
 finally:
     if exc:
         subxact.__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT subtransaction_test();
 SELECT * FROM subtransaction_tbl;
@@ -54,7 +54,7 @@ with plpy.subtransaction():
         plpy.execute("INSERT INTO subtransaction_tbl VALUES ('oops')")
     elif what_error == "Python":
         raise Exception("Python exception")
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT subtransaction_ctx_test();
 SELECT * FROM subtransaction_tbl;
@@ -82,7 +82,7 @@ with plpy.subtransaction():
             raise
         plpy.notice("Swallowed %s(%r)" % (e.__class__.__name__, e.args[0]))
 return "ok"
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT subtransaction_nested_test();
 SELECT * FROM subtransaction_tbl;
@@ -102,7 +102,7 @@ with plpy.subtransaction():
     plpy.execute("INSERT INTO subtransaction_tbl VALUES (2)")
     plpy.execute("SELECT subtransaction_nested_test('t')")
 return "ok"
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT subtransaction_deeply_nested_test();
 SELECT * FROM subtransaction_tbl;
@@ -113,25 +113,25 @@ TRUNCATE subtransaction_tbl;
 CREATE FUNCTION subtransaction_exit_without_enter() RETURNS void
 AS $$
 plpy.subtransaction().__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 CREATE FUNCTION subtransaction_enter_without_exit() RETURNS void
 AS $$
 plpy.subtransaction().__enter__()
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 CREATE FUNCTION subtransaction_exit_twice() RETURNS void
 AS $$
 plpy.subtransaction().__enter__()
 plpy.subtransaction().__exit__(None, None, None)
 plpy.subtransaction().__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 CREATE FUNCTION subtransaction_enter_twice() RETURNS void
 AS $$
 plpy.subtransaction().__enter__()
 plpy.subtransaction().__enter__()
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 CREATE FUNCTION subtransaction_exit_same_subtransaction_twice() RETURNS void
 AS $$
@@ -139,7 +139,7 @@ s = plpy.subtransaction()
 s.__enter__()
 s.__exit__(None, None, None)
 s.__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 CREATE FUNCTION subtransaction_enter_same_subtransaction_twice() RETURNS void
 AS $$
@@ -147,20 +147,20 @@ s = plpy.subtransaction()
 s.__enter__()
 s.__enter__()
 s.__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 -- No warnings here, as the subtransaction gets indeed closed
 CREATE FUNCTION subtransaction_enter_subtransaction_in_with() RETURNS void
 AS $$
 with plpy.subtransaction() as s:
     s.__enter__()
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 CREATE FUNCTION subtransaction_exit_subtransaction_in_with() RETURNS void
 AS $$
 with plpy.subtransaction() as s:
     s.__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT subtransaction_exit_without_enter();
 SELECT subtransaction_enter_without_exit();
@@ -193,7 +193,7 @@ try:
     plpy.execute(p, ["wrong"])
 except plpy.SPIError:
     plpy.warning("Caught a SPI error")
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT subtransaction_mix_explicit_and_implicit();
 SELECT * FROM subtransaction_tbl;
@@ -206,7 +206,7 @@ AS $$
 s = plpy.subtransaction()
 s.enter()
 s.exit(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT subtransaction_alternative_names();
 
@@ -220,7 +220,7 @@ with plpy.subtransaction():
          plpy.execute("INSERT INTO subtransaction_tbl VALUES ('a')")
      except plpy.SPIError:
          plpy.notice("caught")
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT try_catch_inside_subtransaction();
 SELECT * FROM subtransaction_tbl;
@@ -236,7 +236,7 @@ with plpy.subtransaction():
          plpy.execute("INSERT INTO subtransaction_tbl VALUES (1)")
      except plpy.SPIError:
          plpy.notice("caught")
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT pk_violation_inside_subtransaction();
 SELECT * FROM subtransaction_tbl;
@@ -251,7 +251,7 @@ with plpy.subtransaction():
     cur.fetch(10)
 fetched = cur.fetch(10);
 return int(fetched[5]["i"])
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 CREATE FUNCTION cursor_aborted_subxact() RETURNS int AS $$
 try:
@@ -263,7 +263,7 @@ except plpy.SPIError:
     fetched = cur.fetch(10)
     return int(fetched[5]["i"])
 return 0 # not reached
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 CREATE FUNCTION cursor_plan_aborted_subxact() RETURNS int AS $$
 try:
@@ -277,7 +277,7 @@ except plpy.SPIError:
     fetched = cur.fetch(5)
     return fetched[2]["i"]
 return 0 # not reached
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 CREATE FUNCTION cursor_close_aborted_subxact() RETURNS boolean AS $$
 try:
@@ -288,7 +288,7 @@ except plpy.SPIError:
     cur.close()
     return True
 return False # not reached
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 SELECT cursor_in_subxact();
 SELECT cursor_aborted_subxact();
@@ -304,7 +304,7 @@ plpy.execute("select pg_backend_pid()")
 for i in range(0, 5):
     yield (i)
 
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 
 -- inject fault and wait for trigger
 select gp_inject_fault_infinite('begin_internal_sub_transaction', 'error', 1);

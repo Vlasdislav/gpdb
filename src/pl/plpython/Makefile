@@ -59,6 +59,11 @@ OBJS = \
 	plpy_util.o
 
 DATA = $(NAME)u.control $(NAME)u--1.0.sql $(NAME)u--unpackaged--1.0.sql
+ifeq ($(python_majorversion),2)
+ifeq ($(enable_legacy_pl_extensions),yes)
+DATA += plpythonu.control plpythonu--1.0.sql plpythonu--unpackaged--1.0.sql
+endif
+endif
 
 
 # Python on win32 ships with import libraries only for Microsoft Visual C++,
@@ -83,6 +88,13 @@ endif # win32
 SHLIB_LINK = $(python_libspec) $(python_additional_libs) $(filter -lintl,$(LIBS))
 
 REGRESS_OPTS = --dbname=$(PL_TESTDB) --init-file=$(srcdir)/init_file
+# Only load plpythonu with Python 2.  The test files themselves load
+# for plpython3 extension name is the same as language name.
+# we do not need to load again.
+ifeq ($(python_majorversion),2)
+REGRESS_OPTS += --load-extension=plpythonu
+endif
+
 REGRESS_OPTS += --load-extension=gp_inject_fault
 
 REGRESS = \
@@ -163,7 +175,9 @@ pgregress-python3-mangle:
 	      -e 's/\([ [{]\)u"/\1"/g' \
 	      -e "s/\([ [{]\)u'/\1'/g" \
 	      -e "s/def next/def __next__/g" \
+	      -e "s/LANGUAGE plpythonu/LANGUAGE plpython3u/Ig" \
 	      -e "s/LANGUAGE plpython2u/LANGUAGE plpython3u/Ig" \
+	      -e "s/EXTENSION plpythonu/EXTENSION plpython3u/Ig" \
 	      -e "s/EXTENSION plpython2u/EXTENSION plpython3u/Ig" \
 	    $$file >`echo $$file | sed 's,^.*/\([^/][^/]*/\)\([^/][^/]*\)$$,\1python3/\2,'` || exit; \
 	done

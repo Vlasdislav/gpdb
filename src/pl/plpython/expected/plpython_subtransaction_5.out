@@ -27,7 +27,7 @@ try:
 finally:
     if exc:
         subxact.__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 SELECT subtransaction_test();
  subtransaction_test 
 ---------------------
@@ -79,7 +79,7 @@ with plpy.subtransaction():
         plpy.execute("INSERT INTO subtransaction_tbl VALUES ('oops')")
     elif what_error == "Python":
         raise Exception("Python exception")
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "subtransaction_ctx_test"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 3)
 SELECT subtransaction_ctx_test();
@@ -130,7 +130,7 @@ with plpy.subtransaction():
             raise
         plpy.notice("Swallowed %s(%r)" % (e.__class__.__name__, e.args[0]))
 return "ok"
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "subtransaction_nested_test"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 4)
 SELECT subtransaction_nested_test();
@@ -164,7 +164,7 @@ with plpy.subtransaction():
     plpy.execute("INSERT INTO subtransaction_tbl VALUES (2)")
     plpy.execute("SELECT subtransaction_nested_test('t')")
 return "ok"
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "subtransaction_deeply_nested_test"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 4)
 SELECT subtransaction_deeply_nested_test();
@@ -182,49 +182,49 @@ TRUNCATE subtransaction_tbl;
 CREATE FUNCTION subtransaction_exit_without_enter() RETURNS void
 AS $$
 plpy.subtransaction().__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 CREATE FUNCTION subtransaction_enter_without_exit() RETURNS void
 AS $$
 plpy.subtransaction().__enter__()
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 CREATE FUNCTION subtransaction_exit_twice() RETURNS void
 AS $$
 plpy.subtransaction().__enter__()
 plpy.subtransaction().__exit__(None, None, None)
 plpy.subtransaction().__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 CREATE FUNCTION subtransaction_enter_twice() RETURNS void
 AS $$
 plpy.subtransaction().__enter__()
 plpy.subtransaction().__enter__()
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 CREATE FUNCTION subtransaction_exit_same_subtransaction_twice() RETURNS void
 AS $$
 s = plpy.subtransaction()
 s.__enter__()
 s.__exit__(None, None, None)
 s.__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 CREATE FUNCTION subtransaction_enter_same_subtransaction_twice() RETURNS void
 AS $$
 s = plpy.subtransaction()
 s.__enter__()
 s.__enter__()
 s.__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 -- No warnings here, as the subtransaction gets indeed closed
 CREATE FUNCTION subtransaction_enter_subtransaction_in_with() RETURNS void
 AS $$
 with plpy.subtransaction() as s:
     s.__enter__()
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "subtransaction_enter_subtransaction_in_with"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 3)
 CREATE FUNCTION subtransaction_exit_subtransaction_in_with() RETURNS void
 AS $$
 with plpy.subtransaction() as s:
     s.__exit__(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "subtransaction_exit_subtransaction_in_with"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 3)
 SELECT subtransaction_exit_without_enter();
@@ -308,7 +308,7 @@ try:
     plpy.execute(p, ["wrong"])
 except plpy.SPIError:
     plpy.warning("Caught a SPI error")
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "subtransaction_mix_explicit_and_implicit"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 5)
 SELECT subtransaction_mix_explicit_and_implicit();
@@ -328,7 +328,7 @@ AS $$
 s = plpy.subtransaction()
 s.enter()
 s.exit(None, None, None)
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 SELECT subtransaction_alternative_names();
  subtransaction_alternative_names 
 ----------------------------------
@@ -344,7 +344,7 @@ with plpy.subtransaction():
          plpy.execute("INSERT INTO subtransaction_tbl VALUES ('a')")
      except plpy.SPIError:
          plpy.notice("caught")
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "try_catch_inside_subtransaction"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 3)
 SELECT try_catch_inside_subtransaction();
@@ -367,7 +367,7 @@ with plpy.subtransaction():
          plpy.execute("INSERT INTO subtransaction_tbl VALUES (1)")
      except plpy.SPIError:
          plpy.notice("caught")
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "pk_violation_inside_subtransaction"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 3)
 SELECT pk_violation_inside_subtransaction();
@@ -388,7 +388,7 @@ with plpy.subtransaction():
     cur.fetch(10)
 fetched = cur.fetch(10);
 return int(fetched[5]["i"])
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "cursor_in_subxact"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 3)
 CREATE FUNCTION cursor_aborted_subxact() RETURNS int AS $$
@@ -401,7 +401,7 @@ except plpy.SPIError:
     fetched = cur.fetch(10)
     return int(fetched[5]["i"])
 return 0 # not reached
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "cursor_aborted_subxact"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 4)
 CREATE FUNCTION cursor_plan_aborted_subxact() RETURNS int AS $$
@@ -416,7 +416,7 @@ except plpy.SPIError:
     fetched = cur.fetch(5)
     return fetched[2]["i"]
 return 0 # not reached
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "cursor_plan_aborted_subxact"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 4)
 CREATE FUNCTION cursor_close_aborted_subxact() RETURNS boolean AS $$
@@ -428,7 +428,7 @@ except plpy.SPIError:
     cur.close()
     return True
 return False # not reached
-$$ LANGUAGE plpython2u;
+$$ LANGUAGE plpythonu;
 ERROR:  could not compile PL/Python function "cursor_close_aborted_subxact"
 DETAIL:  SyntaxError: invalid syntax (<string>, line 4)
 SELECT cursor_in_subxact();
