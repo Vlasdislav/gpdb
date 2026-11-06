@@ -787,7 +787,7 @@ GCOV
 enable_debug
 enable_gpperfmon
 enable_orafce
-enable__pl_untrusted_extensions
+enable_pl_untrusted_extensions
 enable_debug_extensions
 enable_gpfdist
 enable_rpath
@@ -3389,7 +3389,6 @@ else
 fi
 
 
-enable__pl_untrusted_extensions=$enable_pl_untrusted_extensions
 
 
 
