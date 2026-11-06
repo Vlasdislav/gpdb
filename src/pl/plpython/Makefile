@@ -59,10 +59,8 @@ OBJS = \
 	plpy_util.o
 
 DATA = $(NAME)u.control $(NAME)u--1.0.sql $(NAME)u--unpackaged--1.0.sql
-ifeq ($(python_majorversion),2)
-ifeq ($(enable__pl_untrusted_extensions),yes)
+ifeq ($(python_majorversion)-$(enable__pl_untrusted_extensions),2-yes)
 DATA += plpythonu.control plpythonu--1.0.sql plpythonu--unpackaged--1.0.sql
-endif
 endif
 
 
