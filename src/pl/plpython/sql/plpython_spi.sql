@@ -7,19 +7,19 @@ CREATE FUNCTION nested_call_one(a text) RETURNS text
 'q = "SELECT nested_call_two(''%s'')" % a
 r = plpy.execute(q)
 return r[0]'
-	LANGUAGE plpythonu ;
+	LANGUAGE plpython2u ;
 
 CREATE FUNCTION nested_call_two(a text) RETURNS text
 	AS
 'q = "SELECT nested_call_three(''%s'')" % a
 r = plpy.execute(q)
 return r[0]'
-	LANGUAGE plpythonu ;
+	LANGUAGE plpython2u ;
 
 CREATE FUNCTION nested_call_three(a text) RETURNS text
 	AS
 'return a'
-	LANGUAGE plpythonu ;
+	LANGUAGE plpython2u ;
 
 -- some spi stuff
 
@@ -35,7 +35,7 @@ except Exception, ex:
 	plpy.error(str(ex))
 return None
 '
-	LANGUAGE plpythonu;
+	LANGUAGE plpython2u;
 
 CREATE FUNCTION spi_prepared_plan_test_nested(a text) RETURNS text
 	AS
@@ -50,7 +50,7 @@ except Exception, ex:
 	plpy.error(str(ex))
 return None
 '
-	LANGUAGE plpythonu;
+	LANGUAGE plpython2u;
 
 
 
@@ -66,7 +66,7 @@ for r in rv:
 	seq = seq + r["sequence"]
 return seq
 '
-	LANGUAGE plpythonu;
+	LANGUAGE plpython2u;
 
 
 
@@ -108,7 +108,7 @@ if result.status() > 0:
    return result.nrows()
 else:
    return None
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 SELECT result_metadata_test($$SELECT 1 AS foo, '11'::text AS bar UNION SELECT 2, '22'$$);
 SELECT result_metadata_test($$CREATE TEMPORARY TABLE foo1 (a int, b text)$$);
@@ -117,7 +117,7 @@ CREATE FUNCTION result_nrows_test(cmd text) RETURNS int
 AS $$
 result = plpy.execute(cmd)
 return result.nrows()
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 SELECT result_nrows_test($$SELECT 1$$);
 SELECT result_nrows_test($$CREATE TEMPORARY TABLE foo2 (a int, b text)$$);
@@ -128,7 +128,7 @@ CREATE FUNCTION result_len_test(cmd text) RETURNS int
 AS $$
 result = plpy.execute(cmd)
 return len(result)
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 SELECT result_len_test($$SELECT 1$$);
 SELECT result_len_test($$CREATE TEMPORARY TABLE foo3 (a int, b text)$$);
@@ -158,7 +158,7 @@ except TypeError:
 else:
     assert False, "TypeError not raised"
 
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 SELECT result_subscript_test();
 
@@ -168,7 +168,7 @@ result = plpy.execute("select 1 where false")
 
 plpy.info(result[:])
 
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 SELECT result_empty_test();
 
@@ -177,7 +177,7 @@ AS $$
 plan = plpy.prepare(cmd)
 result = plpy.execute(plan)
 return str(result)
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 SELECT result_str_test($$SELECT 1 AS foo UNION SELECT 2$$);
 SELECT result_str_test($$CREATE TEMPORARY TABLE foo1 (a int, b text)$$);
@@ -191,13 +191,13 @@ for row in res:
     if row['lname'] == 'doe':
         does += 1
 return does
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 CREATE FUNCTION double_cursor_close() RETURNS int AS $$
 res = plpy.cursor("select fname, lname from users")
 res.close()
 res.close()
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 CREATE FUNCTION cursor_fetch() RETURNS int AS $$
 res = plpy.cursor("select fname, lname from users")
@@ -216,7 +216,7 @@ except StopIteration:
     pass
 else:
     assert False, "StopIteration not raised"
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 CREATE FUNCTION cursor_mix_next_and_fetch() RETURNS int AS $$
 res = plpy.cursor("select fname, lname from users order by fname")
@@ -230,7 +230,7 @@ except AttributeError:
 assert item['fname'] == 'rick'
 
 assert len(res.fetch(2)) == 1
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 CREATE FUNCTION fetch_after_close() RETURNS int AS $$
 res = plpy.cursor("select fname, lname from users")
@@ -241,7 +241,7 @@ except ValueError:
     pass
 else:
     assert False, "ValueError not raised"
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 CREATE FUNCTION next_after_close() RETURNS int AS $$
 res = plpy.cursor("select fname, lname from users")
@@ -255,7 +255,7 @@ except ValueError:
     pass
 else:
     assert False, "ValueError not raised"
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 CREATE FUNCTION cursor_fetch_next_empty() RETURNS int AS $$
 res = plpy.cursor("select fname, lname from users where false")
@@ -269,7 +269,7 @@ except StopIteration:
     pass
 else:
     assert False, "StopIteration not raised"
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 CREATE FUNCTION cursor_plan() RETURNS SETOF text AS $$
 plan = plpy.prepare(
@@ -279,13 +279,13 @@ for row in plpy.cursor(plan, ["w"]):
     yield row['fname']
 for row in plpy.cursor(plan, ["j"]):
     yield row['fname']
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 CREATE FUNCTION cursor_plan_wrong_args() RETURNS SETOF text AS $$
 plan = plpy.prepare("select fname, lname from users where fname like $1 || '%'",
                     ["text"])
 c = plpy.cursor(plan, ["a", "b"])
-$$ LANGUAGE plpythonu;
+$$ LANGUAGE plpython2u;
 
 SELECT simple_cursor_test();
 SELECT double_cursor_close();

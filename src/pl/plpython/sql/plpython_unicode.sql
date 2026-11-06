@@ -15,12 +15,12 @@ CREATE TABLE unicode_test (
 
 CREATE FUNCTION unicode_return() RETURNS text AS E'
 return u"\\xA0"
-' LANGUAGE plpythonu;
+' LANGUAGE plpython2u;
 
 CREATE FUNCTION unicode_trigger() RETURNS trigger AS E'
 TD["new"]["testvalue"] = u"\\xA0"
 return "MODIFY"
-' LANGUAGE plpythonu;
+' LANGUAGE plpython2u;
 
 CREATE TRIGGER unicode_test_bi BEFORE INSERT ON unicode_test
   FOR EACH ROW EXECUTE PROCEDURE unicode_trigger();
@@ -29,13 +29,13 @@ CREATE FUNCTION unicode_plan1() RETURNS text AS E'
 plan = plpy.prepare("SELECT $1 AS testvalue", ["text"])
 rv = plpy.execute(plan, [u"\\xA0"], 1)
 return rv[0]["testvalue"]
-' LANGUAGE plpythonu;
+' LANGUAGE plpython2u;
 
 CREATE FUNCTION unicode_plan2() RETURNS text AS E'
 plan = plpy.prepare("SELECT $1 || $2 AS testvalue", ["text", u"text"])
 rv = plpy.execute(plan, ["foo", "bar"], 1)
 return rv[0]["testvalue"]
-' LANGUAGE plpythonu;
+' LANGUAGE plpython2u;
 
 
 SELECT unicode_return();

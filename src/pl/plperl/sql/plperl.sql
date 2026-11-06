@@ -2,6 +2,10 @@
 -- Test result value processing
 --
 
+-- These legacy extensions must not be shipped.
+SELECT name FROM pg_available_extensions
+WHERE name IN ('plperlu', 'plpythonu') ORDER BY name;
+
 CREATE OR REPLACE FUNCTION perl_int(int) RETURNS INTEGER AS $$
 return undef;
 $$ LANGUAGE plperl;
