@@ -60,7 +60,7 @@ OBJS = \
 
 DATA = $(NAME)u.control $(NAME)u--1.0.sql $(NAME)u--unpackaged--1.0.sql
 ifeq ($(python_majorversion),2)
-ifeq ($(enable_legacy_pl_extensions),yes)
+ifeq ($(enable__pl_untrusted_extensions),yes)
 DATA += plpythonu.control plpythonu--1.0.sql plpythonu--unpackaged--1.0.sql
 endif
 endif

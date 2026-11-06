@@ -37,7 +37,7 @@ NAME = plperl
 OBJS = plperl.o SPI.o Util.o
 
 DATA = plperl.control plperl--1.0.sql plperl--unpackaged--1.0.sql
-ifeq ($(enable_legacy_pl_extensions),yes)
+ifeq ($(enable__pl_untrusted_extensions),yes)
 DATA += plperlu.control plperlu--1.0.sql plperlu--unpackaged--1.0.sql
 endif
 
