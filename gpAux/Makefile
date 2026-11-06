@@ -303,7 +303,6 @@ endif
 #---------------------------------------------------------------------
 
 dist : INSTCFLAGS=$(OPTFLAGS)
-dist : CONFIGFLAGS+= --disable-legacy-pl-extensions
 dist : INSTLOC=$(DISTPATH)
 dist : CLIENTSINSTLOC=$(CLIENTSDISTPATH)
 ifdef ENABLE_VPATH_BUILD
@@ -316,7 +315,6 @@ endif
 	$(BUILD_STEPS)
 
 dist_prof : INSTCFLAGS=$(PROFFLAGS)
-dist_prof : CONFIGFLAGS+= --disable-legacy-pl-extensions
 dist_prof : INSTLOC=$(DISTPATH)
 dist_prof : CLIENTSINSTLOC=$(CLIENTSDISTPATH)
 ifdef ENABLE_VPATH_BUILD
